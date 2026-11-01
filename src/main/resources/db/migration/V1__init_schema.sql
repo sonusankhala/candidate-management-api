@@ -17,8 +17,8 @@ CREATE TABLE candidates (
     notes               TEXT,
     version             BIGINT        NOT NULL DEFAULT 0,
     created_at          TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at          TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY ux_candidates_email (email)
+    updated_at          TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT ux_candidates_email UNIQUE (email)
 );
 
 CREATE INDEX ix_candidates_status ON candidates (status);

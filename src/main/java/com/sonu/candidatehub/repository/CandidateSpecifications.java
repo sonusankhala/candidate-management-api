@@ -27,11 +27,11 @@ public final class CandidateSpecifications {
             if (hasText(filter.q())) {
                 String likePattern = "%" + escapeLike(filter.q().toLowerCase()) + "%";
                 predicates.add(cb.or(
-                    cb.like(cb.lower(root.get("firstName")), likePattern, '\\'),
-                    cb.like(cb.lower(root.get("lastName")), likePattern, '\\'),
-                    cb.like(cb.lower(root.get("email")), likePattern, '\\'),
-                    cb.like(cb.lower(root.get("headline")), likePattern, '\\'),
-                    cb.like(cb.lower(root.get("currentCompany")), likePattern, '\\')
+                    cb.like(cb.lower(root.get("firstName")), likePattern, '!'),
+                    cb.like(cb.lower(root.get("lastName")), likePattern, '!'),
+                    cb.like(cb.lower(root.get("email")), likePattern, '!'),
+                    cb.like(cb.lower(root.get("headline")), likePattern, '!'),
+                    cb.like(cb.lower(root.get("currentCompany")), likePattern, '!')
                 ));
             }
 
@@ -92,8 +92,8 @@ public final class CandidateSpecifications {
 
     private static String escapeLike(String s) {
         // Escape SQL LIKE wildcards so user input can't inject unintended patterns
-        return s.replace("\\", "\\\\")
-                .replace("%", "\\%")
-                .replace("_", "\\_");
+        return s.replace("\\", "!!")
+                .replace("%", "!%")
+                .replace("_", "!_");
     }
 }
