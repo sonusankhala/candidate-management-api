@@ -30,7 +30,11 @@ flowchart TD
 
 - **Multi-criteria search via JPA Specifications**, not one repository method per filter combination — every filter is optional and independently composable; adding a new filter means adding one predicate, not a new method.
 - **Pagination capped at 100 server-side** regardless of what a client requests — prevents an unbounded result set from degrading performance.
-- **PUT currently does a partial update** (omitted fields left unchanged, not cleared) — pragmatic for this domain, where accidental data loss from an incomplete payload is a bigger risk than strict REST semantics. A PATCH endpoint for true partial updates, alongside a strict full-replace PUT, is a natural next step.
+- **PUT – Replacement-style update**: Clients submit all required fields. Omitted optional fields are cleared, and omitted skills are treated as empty. The existing status is preserved if not provided.
+
+- **PATCH – Partial update**: Only non-null fields are updated; omitted fields remain unchanged. Explicit null is treated as omitted, so fields cannot currently be cleared using PATCH.
+
+- **Why both**: PUT replaces editable candidate data, while PATCH allows targeted updates without resubmitting the complete representation.
 - **201 + Location header on create, 204 on delete** — correct REST status codes rather than defaulting everything to 200.
 
 ## Error Handling
