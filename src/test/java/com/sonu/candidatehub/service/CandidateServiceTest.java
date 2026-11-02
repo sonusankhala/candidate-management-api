@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.repository.CrudRepository;
 
 import com.sonu.candidatehub.domain.Candidate;
@@ -85,6 +86,22 @@ class CandidateServiceTest {
             .hasMessageContaining("priya.sharma@example.com");
 
         verify(candidateRepository, never()).saveAndFlush(any());
+    }
+    
+    @Test
+    void create_propagatesOriginalException_whenOtherDatabaseConstraintFails() {
+
+        when(candidateRepository.existsByEmailIgnoreCase("priya.sharma@example.com"))
+                .thenReturn(false);
+
+        when(candidateMapper.toEntity(validRequest)).thenReturn(savedEntity);
+
+        when(candidateRepository.saveAndFlush(savedEntity))
+                .thenThrow(new DataIntegrityViolationException("Other constraint failed"));
+
+        assertThatThrownBy(() -> candidateService.create(validRequest))
+                .isInstanceOf(DataIntegrityViolationException.class)
+                .hasMessageContaining("Other constraint failed");
     }
 
     @Test

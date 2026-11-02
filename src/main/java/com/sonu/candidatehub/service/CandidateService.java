@@ -1,5 +1,6 @@
 package com.sonu.candidatehub.service;
 
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -42,14 +43,36 @@ public class CandidateService {
         } catch (DataIntegrityViolationException e) {
             // Backup for the race condition: two concurrent requests both
             // passed the existsBy check above before either one committed.
-            throw new DuplicateEmailException(normalizedEmail);
+        	if (isDuplicateEmailViolation(e)) {
+                throw new DuplicateEmailException(normalizedEmail);
+            }
+            throw e;
         }
 
         log.info("Created candidate id={} email={}", candidate.getId(), normalizedEmail);
         return candidateMapper.toResponse(candidate);
     }
 
-    @Transactional(readOnly = true)
+    private boolean isDuplicateEmailViolation(DataIntegrityViolationException ex) {
+
+        Throwable cause = ex;
+
+        while (cause != null) {
+
+            if (cause instanceof ConstraintViolationException violationException) {
+
+                String constraintName = violationException.getConstraintName();
+
+                return "ux_candidates_email".equalsIgnoreCase(constraintName);
+            }
+
+            cause = cause.getCause();
+        }
+
+        return false;
+    }
+
+	@Transactional(readOnly = true)
     public CandidateResponse getById(Long id) {
         Candidate candidate = findCandidateOrThrow(id);
         return candidateMapper.toResponse(candidate);
@@ -76,7 +99,10 @@ public class CandidateService {
         try {
             candidate = candidateRepository.saveAndFlush(candidate);
         } catch (DataIntegrityViolationException e) {
-            throw new DuplicateEmailException(normalizedEmail);
+        	if (isDuplicateEmailViolation(e)) {
+                throw new DuplicateEmailException(normalizedEmail);
+            }
+            throw e;
         }
 
         log.info("Updated candidate id={}", candidate.getId());
@@ -97,7 +123,10 @@ public class CandidateService {
         try {
             candidate = candidateRepository.saveAndFlush(candidate);
         } catch (DataIntegrityViolationException e) {
-            throw new DuplicateEmailException(request.email());
+        	if (isDuplicateEmailViolation(e)) {
+                throw new DuplicateEmailException(request.email());
+            }
+            throw e;
         }
 
         log.info("Patched candidate id={}", candidate.getId());
