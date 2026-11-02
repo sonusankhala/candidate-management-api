@@ -24,6 +24,7 @@ Every piece of code was compiled, run, and manually tested via Postman before be
 
 ## Where AI Recommendations Were Not Followed
 
+- **Database exception mapping** - In CandidateService, create, update, and patch methods catch DataIntegrityViolationException and convert it into DuplicateEmailException. A database integrity error could be caused by another constraint, not just duplicate email. Only report a duplicate email when you have evidence that the email constraint failed; otherwise let the general exception handler deal with it.
 - **Dynamic filtering approach** — a hardcoded-query-method-per-filter-combination approach was considered and rejected in favor of JPA Specifications: every filter is independently optional and composed as a predicate only when present, so adding a new filter later means adding one predicate, not a new method.
 - **MapStruct** for entity/DTO mapping — used a hand-written mapper instead, since the entity is small (~17 fields) and manual mapping keeps every conversion step visible and easy to explain line by line, rather than relying on annotation-processor-generated code.
 - **Lombok `@Data`** on the JPA entity — used only `@Getter`/`@Setter`/`@NoArgsConstructor`, since `@Data`'s generated `equals()`/`hashCode()` can cause issues with lazy-loaded JPA collections and proxy objects.
