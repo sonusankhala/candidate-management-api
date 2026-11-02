@@ -1,29 +1,52 @@
 package com.sonu.candidatehub.controller;
 
+import java.net.URI;
+import java.util.Set;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.sonu.candidatehub.domain.CandidateStatus;
 import com.sonu.candidatehub.dto.CandidateFilter;
 import com.sonu.candidatehub.dto.CandidateRequest;
 import com.sonu.candidatehub.dto.CandidateResponse;
 import com.sonu.candidatehub.service.CandidateService;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
-import java.util.Set;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/candidates")
 @RequiredArgsConstructor
+@Validated
 public class CandidateController {
 
     private static final int MAX_PAGE_SIZE = 100;
+    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
+    	    "id",
+    	    "firstName",
+    	    "lastName",
+    	    "email",
+    	    "location",
+    	    "experienceYears",
+    	    "createdAt",
+    	    "updatedAt"
+    	);
 
     private final CandidateService candidateService;
 
@@ -52,8 +75,12 @@ public class CandidateController {
             @RequestParam(required = false) String currentCompany,
             @RequestParam(required = false) Integer maxNoticePeriod,
             @RequestParam(required = false) String source,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "0")
+            @Min(value = 0, message = "Page number cannot be negative")
+            int page,
+            @RequestParam(defaultValue = "20")
+            @Min(value = 1, message = "Page size must be at least 1")
+            int size,
             @RequestParam(defaultValue = "createdAt,desc") String sort
     ) {
         int safeSize = Math.min(size, MAX_PAGE_SIZE);
@@ -88,13 +115,36 @@ public class CandidateController {
         candidateService.delete(id);
         return ResponseEntity.noContent().build();
     }
+    
+	private Sort parseSort(String sortParam) {
 
-    private Sort parseSort(String sortParam) {
-        String[] parts = sortParam.split(",");
-        String property = parts[0];
-        Sort.Direction direction = (parts.length > 1 && parts[1].equalsIgnoreCase("asc"))
-            ? Sort.Direction.ASC
-            : Sort.Direction.DESC;
-        return Sort.by(direction, property);
-    }
+		String[] parts = sortParam.split(",", -1);
+
+		String property = parts[0].trim();
+
+		if (!ALLOWED_SORT_FIELDS.contains(property)) {
+			throw new IllegalArgumentException("Invalid sort field: " + property);
+		}
+
+		if (parts.length > 2) {
+			throw new IllegalArgumentException("Invalid sort parameter");
+		}
+
+		Sort.Direction direction = Sort.Direction.DESC;
+
+		if (parts.length == 2) {
+			String directionParam = parts[1].trim();
+
+			if (directionParam.equalsIgnoreCase("asc")) {
+				direction = Sort.Direction.ASC;
+			} else if (directionParam.equalsIgnoreCase("desc")) {
+				direction = Sort.Direction.DESC;
+			} else {
+				throw new IllegalArgumentException("Invalid sort direction: " + directionParam);
+			}
+		}
+
+		return Sort.by(direction, property);
+	}
+
 }

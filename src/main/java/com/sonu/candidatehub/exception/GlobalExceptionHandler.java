@@ -73,4 +73,12 @@ public class GlobalExceptionHandler {
             "An unexpected error occurred. Please try again later."
         );
     }
+    
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ProblemDetail handleIllegalArgument(IllegalArgumentException ex) {
+        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        problem.setTitle("Invalid Request");
+        problem.setDetail(ex.getMessage());
+        return problem;
+    }
 }
