@@ -115,21 +115,6 @@ curl -X POST http://localhost:8080/api/v1/candidates \
 curl "http://localhost:8080/api/v1/candidates?location=Hyderabad&minExperience=3&skills=java&matchAllSkills=false"
 ```
 
-## Project Structure
-src/main/java/com/sonu/candidatehub/
-domain/ Candidate entity, CandidateStatus enum
-dto/ Request/response/filter DTOs
-mapper/ Entity ↔ DTO conversion
-repository/ Spring Data repository + dynamic Specifications
-service/ Business logic
-controller/ REST endpoints
-exception/ Custom exceptions + global exception handler
-config/ OpenAPI configuration
-src/main/resources/
-application.yml
-db/migration/ Flyway SQL migrations
-src/test/java/ Unit, repository, and integration tests
-
 ## Further Documentation
 
 - [DESIGN.md](./DESIGN.md) — architecture decisions, data model, and scaling strategy
