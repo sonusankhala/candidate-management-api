@@ -58,6 +58,25 @@ public class CandidateMapper {
         candidate.setNotes(request.notes());
         candidate.setSkills(normalizeSkills(request.skills()));
     }
+    
+    public void patchEntity(Candidate candidate, CandidateRequest request) {
+        if (request.firstName() != null) candidate.setFirstName(request.firstName());
+        if (request.lastName() != null) candidate.setLastName(request.lastName());
+        if (request.email() != null) candidate.setEmail(normalizeEmail(request.email()));
+        if (request.phone() != null) candidate.setPhone(request.phone());
+        if (request.location() != null) candidate.setLocation(request.location());
+        if (request.currentCompany() != null) candidate.setCurrentCompany(request.currentCompany());
+        if (request.currentJobTitle() != null) candidate.setCurrentJobTitle(request.currentJobTitle());
+        if (request.headline() != null) candidate.setHeadline(request.headline());
+        if (request.experienceYears() != null) candidate.setExperienceYears(request.experienceYears());
+        if (request.noticePeriodDays() != null) candidate.setNoticePeriodDays(request.noticePeriodDays());
+        if (request.highestEducation() != null) candidate.setHighestEducation(request.highestEducation());
+        if (request.status() != null) candidate.setStatus(request.status());
+        if (request.source() != null) candidate.setSource(request.source());
+        if (request.resumeUrl() != null) candidate.setResumeUrl(request.resumeUrl());
+        if (request.notes() != null) candidate.setNotes(request.notes());
+        if (request.skills() != null) candidate.setSkills(normalizeSkills(request.skills()));
+    }
 
     public CandidateResponse toResponse(Candidate candidate) {
         return new CandidateResponse(

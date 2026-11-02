@@ -82,6 +82,27 @@ public class CandidateService {
         log.info("Updated candidate id={}", candidate.getId());
         return candidateMapper.toResponse(candidate);
     }
+    
+    @Transactional
+    public CandidateResponse patch(Long id, CandidateRequest request) {
+    	Candidate candidate=findCandidateOrThrow(id);
+    	if(request.email()!=null) {
+    		String normalizedEmail = request.email().trim().toLowerCase();
+            if (candidateRepository.existsByEmailIgnoreCaseAndIdNot(normalizedEmail, id)) {
+                throw new DuplicateEmailException(normalizedEmail);
+            }
+    	}
+    	candidateMapper.patchEntity(candidate, request);
+
+        try {
+            candidate = candidateRepository.saveAndFlush(candidate);
+        } catch (DataIntegrityViolationException e) {
+            throw new DuplicateEmailException(request.email());
+        }
+
+        log.info("Patched candidate id={}", candidate.getId());
+        return candidateMapper.toResponse(candidate);
+    }
 
     @Transactional
     public void delete(Long id) {

@@ -74,6 +74,14 @@ public class CandidateController {
     ) {
         return ResponseEntity.ok(candidateService.update(id, request));
     }
+    
+    @PatchMapping("/{id}")
+    public ResponseEntity<CandidateResponse> patch(
+            @PathVariable Long id,
+            @RequestBody CandidateRequest request
+    ) {
+        return ResponseEntity.ok(candidateService.patch(id, request));
+    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
