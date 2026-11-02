@@ -99,7 +99,7 @@ All optional, combinable in any combination:
 curl -X POST http://localhost:8080/api/v1/candidates \
   -H "Content-Type: application/json" \
   -d '{
-    "firstName": "Test,
+    "firstName": "Test",
     "lastName": "User",
     "email": "test.user@example.com",
     "location": "Hyderabad",
